@@ -59,8 +59,9 @@ function accelerationChange(accx, accy, accz) {
 
 function rotationChange(rotx, roty, rotz) {
     const tilt = Math.abs(((rotx + 180) % 360 + 360) % 360 - 180);
-    if ((tilt >= uprightTilt) !== fireGateOn) {
-        setFireGate(tilt >= uprightTilt);
+    const shouldPlay = tilt >= uprightTilt;
+    if (shouldPlay !== fireGateOn) {
+        playAudio(shouldPlay);
     }
 }
 
@@ -100,8 +101,8 @@ function getMinMaxParam(address) {
 //
 //==========================================================================================
 
-function setFireGate(isOn) {
-    if (!dspNode || fireGateOn === isOn) {
+function playAudio(isOn) {
+    if (!dspNode || audioContext.state === 'suspended' || fireGateOn === isOn) {
         return;
     }
 
