@@ -7,19 +7,18 @@
 //------------------------------------------------------------------------------------------
 //
 //==========================================================================================
-let dspNode = null;
-let dspNodeParams = null;
-let jsonParams = null;
-let accelerationBaselineZ = null;
-let movementArmed = true;
-let quietSince = null;
-const movementThreshold = 4.5;
-const movementReleaseThreshold = 2;
-const quietRearmTime = 180;
+let dspNode = null; 
+let dspNodeParams = null; 
+let jsonParams = null; 
+let accelerationBaselineZ = null; // Slowly updated resting Z acceleration for comparison.
+let movementArmed = true; // Allows one bell strike until the phone settles and rearms.
+let quietSince = null; // Time when the phone first entered the quiet/reset range.
+const movementThreshold = 5; // Minimum Z acceleration change that triggers a strike.
+const movementReleaseThreshold = 3; // Below this change, the phone counts as settled.
+const quietRearmTime = 180; // Quiet time in milliseconds required before another strike.
 
-// Change here to ("tuono") depending on your wasm file name
-const dspName = "churchBell";
-const instance = new FaustWasm2ScriptProcessor(dspName);
+const dspName = "churchBell"; // Must match the name of the loaded WASM DSP.
+const instance = new FaustWasm2ScriptProcessor(dspName); // Faust processor wrapper.
 
 // output to window or npm package module
 if (typeof module === "undefined") {
@@ -58,6 +57,7 @@ churchBell.createDSP(audioContext, 1024)
 //==========================================================================================
 
 function accelerationChange(accx, accy, accz) {
+    // Ignore unavailable sensor readings and use the first Z reading as the resting reference.
     if (!Number.isFinite(accz)) {
         return;
     }
@@ -67,10 +67,11 @@ function accelerationChange(accx, accy, accz) {
         return;
     }
 
-    const movement = accz - accelerationBaselineZ;
+    const movement = accz - accelerationBaselineZ; // Signed change detects either direction.
     const movementMagnitude = Math.abs(movement);
     const now = performance.now();
 
+    // Strike once on a large forward/backward move; wait for a brief return to quiet before rearming.
     if (movementArmed && movementMagnitude >= movementThreshold) {
         playAudio();
         movementArmed = false;
@@ -82,6 +83,7 @@ function accelerationChange(accx, accy, accz) {
             movementArmed = true;
         }
 
+        // Follow gradual changes in the phone's resting orientation without absorbing sharp moves.
         accelerationBaselineZ += (accz - accelerationBaselineZ) * 0.02;
     } else {
         quietSince = null;
@@ -89,14 +91,15 @@ function accelerationChange(accx, accy, accz) {
 }
 
 function rotationChange(rotx, roty, rotz) {
+    // Interaction 2 uses accelerationZ rather than rotation for forward/backward movement.
 }
 
 function mousePressed() {
     // playAudio()
-    // Use this for debugging from the desktop!
 }
 
 function deviceMoved() {
+    // Update the shared UI indicator when p5 detects movement.
     movetimer = millis();
     statusLabels[2].style("color", "pink");
 }
@@ -105,11 +108,13 @@ function deviceTurned() {
     threshVals[1] = turnAxis;
 }
 /* function deviceShaken() {
+    // Intentionally disabled: the acceleration threshold above controls bell playback.
     shaketimer = millis();
     statusLabels[0].style("color", "pink");
 } */
 
 function getMinMaxParam(address) {
+    // Look up and log the allowed range for a Faust control by its address.
     const exampleMinMaxParam = findByAddress(dspNodeParams, address);
     // ALWAYS PAY ATTENTION TO MIN AND MAX, ELSE YOU MAY GET REALLY HIGH VOLUMES FROM YOUR SPEAKERS
     const [exampleMinValue, exampleMaxValue] = getParamMinMax(exampleMinMaxParam);
@@ -128,6 +133,7 @@ function getMinMaxParam(address) {
 //==========================================================================================
 
 function playAudio() {
+    // Trigger the bell gate briefly; don't attempt playback before DSP/audio are ready.
     if (!dspNode) {
         return;
     }
