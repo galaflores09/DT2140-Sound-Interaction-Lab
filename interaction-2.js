@@ -107,11 +107,11 @@ function deviceMoved() {
 function deviceTurned() {
     threshVals[1] = turnAxis;
 }
-/* function deviceShaken() {
+function deviceShaken() {
     // Intentionally disabled: the acceleration threshold above controls bell playback.
     shaketimer = millis();
     statusLabels[0].style("color", "pink");
-} */
+}
 
 function getMinMaxParam(address) {
     // Look up and log the allowed range for a Faust control by its address.
