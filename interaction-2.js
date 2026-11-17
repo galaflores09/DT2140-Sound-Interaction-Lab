@@ -14,7 +14,7 @@ let accelerationBaselineZ = null; // Slowly updated resting Z acceleration for c
 let movementArmed = true; // Allows one bell strike until the phone settles and rearms.
 let quietSince = null; // Time when the phone first entered the quiet/reset range.
 const movementThreshold = 5; // Minimum Z acceleration change that triggers a strike.
-const movementReleaseThreshold = 3; // Below this change, the phone counts as settled.
+const movementReleaseThreshold = 2; // Below this change, the phone counts as settled.
 const quietRearmTime = 180; // Quiet time in milliseconds required before another strike.
 
 const dspName = "churchBell"; // Must match the name of the loaded WASM DSP.
