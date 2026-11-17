@@ -104,10 +104,10 @@ function deviceMoved() {
 function deviceTurned() {
     threshVals[1] = turnAxis;
 }
-function deviceShaken() {
+/* function deviceShaken() {
     shaketimer = millis();
     statusLabels[0].style("color", "pink");
-}
+} */
 
 function getMinMaxParam(address) {
     const exampleMinMaxParam = findByAddress(dspNodeParams, address);
