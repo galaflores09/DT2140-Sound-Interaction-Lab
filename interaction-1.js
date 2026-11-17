@@ -11,7 +11,12 @@ let dspNode = null;
 let dspNodeParams = null;
 let jsonParams = null;
 let lastTiltSide = 0;
+let lastShakeTime = 0;
 const tiltThreshold = 12; // degrees
+const minShakeInterval = 200; // milliseconds
+const maxShakeInterval = 1000; // milliseconds
+const minBubbleFrequency = 150;
+const maxBubbleFrequency = 2000;
 
 // Change here to ("tuono") depending on your wasm file name
 const dspName = "bubble";
@@ -58,11 +63,27 @@ function accelerationChange(accx, accy, accz) {
 }
 
 function rotationChange(rotx, roty, rotz) {
+    // Use rotationZ for a phone held upright and tilted left and right.
     const tilt = rotz;
     const side = tilt > tiltThreshold ? 1 : tilt < -tiltThreshold ? -1 : 0;
 
     if (side !== 0 && (lastTiltSide === 0 || side !== lastTiltSide)) {
-        playAudio();
+        const now = performance.now();
+        let frequency = 600;
+
+        if (lastShakeTime !== 0) {
+            const interval = Math.max(
+                minShakeInterval,
+                Math.min(maxShakeInterval, now - lastShakeTime)
+            );
+            const speed = (maxShakeInterval - interval)
+                / (maxShakeInterval - minShakeInterval);
+            frequency = minBubbleFrequency
+                + speed * (maxBubbleFrequency - minBubbleFrequency);
+        }
+
+        playAudio(frequency);
+        lastShakeTime = now;
     }
 
     if (side === 0) {
@@ -90,7 +111,6 @@ function deviceTurned() {
 function deviceShaken() {
     shaketimer = millis();
     statusLabels[0].style("color", "pink");
-    playAudio();
 }
 
 function getMinMaxParam(address) {
@@ -111,7 +131,7 @@ function getMinMaxParam(address) {
 //
 //==========================================================================================
 
-function playAudio() {
+function playAudio(frequency = 600) {
     if (!dspNode) {
         return;
     }
@@ -122,8 +142,9 @@ function playAudio() {
     // them printed on the console of your browser when you load the page)
     // For example if you change to a bell sound, here you could use "/churchBell/gate" instead of
     // "/thunder/rumble".
-    dspNode.setParamValue("/bubble/drop", 1)
-    setTimeout(() => { dspNode.setParamValue("/bubble/drop", 0) }, 100);
+    dspNode.setParamValue("/bubble/bubble/freq", frequency);
+    dspNode.setParamValue("/bubble/drop", 1);
+    setTimeout(() => { dspNode.setParamValue("/bubble/drop", 0); }, 100);
 }
 
 //==========================================================================================
