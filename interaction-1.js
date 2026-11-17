@@ -10,6 +10,8 @@
 let dspNode = null;
 let dspNodeParams = null;
 let jsonParams = null;
+let lastTiltSide = 0;
+const tiltThreshold = 12; // degrees
 
 // Change here to ("tuono") depending on your wasm file name
 const dspName = "bubble";
@@ -56,6 +58,16 @@ function accelerationChange(accx, accy, accz) {
 }
 
 function rotationChange(rotx, roty, rotz) {
+    const tilt = rotz;
+    const side = tilt > tiltThreshold ? 1
+        : tilt < -tiltThreshold ? -1
+            : 0;
+
+    if (side !== 0 && side !== lastTiltSide) {
+        playAudio();
+    }
+
+    lastTiltSide = side;
 }
 
 function mousePressed() {
