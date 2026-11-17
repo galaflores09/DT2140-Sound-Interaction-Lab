@@ -10,6 +10,9 @@
 let dspNode = null;
 let dspNodeParams = null;
 let jsonParams = null;
+let fireGateOn = false;
+const fireStartTilt = 75;
+const fireStopTilt = 60;
 
 // Change here to ("tuono") depending on your wasm file name
 const dspName = "fire";
@@ -56,11 +59,18 @@ function accelerationChange(accx, accy, accz) {
 }
 
 function rotationChange(rotx, roty, rotz) {
+    // Normalize the front/back tilt so angles wrapping past 360 degrees work in either direction.
+    const tilt = Math.abs(((rotx + 180) % 360 + 360) % 360 - 180);
+
+    if (!fireGateOn && tilt >= fireStartTilt) {
+        setFireGate(true);
+    } else if (fireGateOn && tilt <= fireStopTilt) {
+        setFireGate(false);
+    }
 }
 
 function mousePressed() {
-    playAudio(mouseX/windowWidth)
-    // Use this for debugging from the desktop!
+    // Fire playback is controlled by phone orientation.
 }
 
 function deviceMoved() {
@@ -74,7 +84,6 @@ function deviceTurned() {
 function deviceShaken() {
     shaketimer = millis();
     statusLabels[0].style("color", "pink");
-    playAudio();
 }
 
 function getMinMaxParam(address) {
@@ -95,17 +104,13 @@ function getMinMaxParam(address) {
 //
 //==========================================================================================
 
-function playAudio(pressure) {
+function setFireGate(isOn) {
     if (!dspNode) {
         return;
     }
-    if (audioContext.state === 'suspended') {
-        return;
-    }
-    /* console.log(pressure)
-    dspNode.setParamValue("/fire/gate/pressure", pressure) */
-    dspNode.setParamValue("/fire/gate", 1)
-    setTimeout(() => { dspNode.setParamValue("/fire/gate", 0) }, 100);
+
+    dspNode.setParamValue("/fire/gate", isOn ? 1 : 0);
+    fireGateOn = isOn;
 }
 
 //==========================================================================================
