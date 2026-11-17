@@ -10,8 +10,9 @@
 let dspNode = null;
 let dspNodeParams = null;
 let jsonParams = null;
-let fireGateOn = false;
-const uprightTilt = 90;
+
+let fireGateOn = false; 
+const uprightTilt = 80; 
 
 // Change here to ("tuono") depending on your wasm file name
 const dspName = "fire";
@@ -58,9 +59,9 @@ function accelerationChange(accx, accy, accz) {
 }
 
 function rotationChange(rotx, roty, rotz) {
-    const tilt = Math.abs(((rotx + 180) % 360 + 360) % 360 - 180);
-    const shouldPlay = tilt >= uprightTilt;
-    if (shouldPlay !== fireGateOn) {
+    const tilt = Math.abs(((rotx + 180) % 360 + 360) % 360 - 180); 
+    const shouldPlay = tilt >= uprightTilt; 
+    if (shouldPlay !== fireGateOn) { 
         playAudio(shouldPlay);
     }
 }

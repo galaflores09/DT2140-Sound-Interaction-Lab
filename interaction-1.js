@@ -10,6 +10,7 @@
 let dspNode = null;
 let dspNodeParams = null;
 let jsonParams = null;
+
 let lastTiltSide = 0;
 let lastShakeTime = 0;
 const tiltThreshold = 12; // degrees

@@ -10,12 +10,13 @@
 let dspNode = null;
 let dspNodeParams = null;
 let jsonParams = null;
+
 let accelerationBaselineZ = null;
 let movementArmed = true;
-let quietSince = null;
-const movementThreshold = 4.5;
-const movementReleaseThreshold = 2;
-const quietRearmTime = 100;
+let quietSince = null; 
+const movementThreshold = 4.5; 
+const movementReleaseThreshold = 2; 
+const quietRearmTime = 100; 
 
 // Change here to ("tuono") depending on your wasm file name
 const dspName = "churchBell";
@@ -63,26 +64,26 @@ function accelerationChange(accx, accy, accz) {
     }
 
     if (accelerationBaselineZ === null) {
-        accelerationBaselineZ = accz;
+        accelerationBaselineZ = accz; 
         return;
     }
 
     const movement = accz - accelerationBaselineZ;
     const movementMagnitude = Math.abs(movement);
-    const now = performance.now();
+    const now = performance.now(); 
 
     if (movementArmed && movementMagnitude >= movementThreshold) {
         playAudio();
         movementArmed = false;
-        quietSince = null;
+        quietSince = null; 
     } else if (movementMagnitude < movementReleaseThreshold) {
         if (quietSince === null) {
-            quietSince = now;
+            quietSince = now; 
         } else if (now - quietSince >= quietRearmTime) {
             movementArmed = true;
         }
 
-        accelerationBaselineZ += (accz - accelerationBaselineZ) * 0.02;
+        accelerationBaselineZ += (accz - accelerationBaselineZ) * 0.02; 
     } else {
         quietSince = null;
     }
@@ -92,7 +93,6 @@ function rotationChange(rotx, roty, rotz) {
 }
 
 function mousePressed() {
-    // playAudio()
     // Use this for debugging from the desktop!
 }
 
