@@ -15,7 +15,7 @@ let movementArmed = true;
 let quietSince = null;
 const movementThreshold = 4.5;
 const movementReleaseThreshold = 2;
-const quietRearmTime = 180;
+const quietRearmTime = 100;
 
 // Change here to ("tuono") depending on your wasm file name
 const dspName = "churchBell";
