@@ -15,8 +15,8 @@ let lastShakeTime = 0;
 const tiltThreshold = 12; // degrees
 const minShakeInterval = 200; // milliseconds
 const maxShakeInterval = 1000; // milliseconds
-const minBubbleFrequency = 150;
-const maxBubbleFrequency = 2000;
+const minBubbleFrequency = 500;
+const maxBubbleFrequency = 1400;
 
 // Change here to ("tuono") depending on your wasm file name
 const dspName = "bubble";
@@ -69,7 +69,7 @@ function rotationChange(rotx, roty, rotz) {
 
     if (side !== 0 && (lastTiltSide === 0 || side !== lastTiltSide)) {
         const now = performance.now();
-        let frequency = 600;
+        let frequency = (minBubbleFrequency + maxBubbleFrequency) / 2;
 
         if (lastShakeTime !== 0) {
             const interval = Math.max(
