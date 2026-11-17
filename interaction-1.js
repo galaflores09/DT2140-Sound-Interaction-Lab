@@ -143,6 +143,7 @@ function playAudio(frequency = 600) {
     // For example if you change to a bell sound, here you could use "/churchBell/gate" instead of
     // "/thunder/rumble".
     dspNode.setParamValue("/bubble/bubble/freq", frequency);
+    dspNode.setParamValue("/bubble/bubble/volume", 1);
     dspNode.setParamValue("/bubble/drop", 1);
     setTimeout(() => { dspNode.setParamValue("/bubble/drop", 0); }, 100);
 }
