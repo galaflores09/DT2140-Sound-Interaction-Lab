@@ -10,6 +10,12 @@
 let dspNode = null;
 let dspNodeParams = null;
 let jsonParams = null;
+let accelerationBaselineZ = null;
+let movementArmed = true;
+let quietSince = null;
+const movementThreshold = 4.5;
+const movementReleaseThreshold = 2;
+const quietRearmTime = 180;
 
 // Change here to ("tuono") depending on your wasm file name
 const dspName = "churchBell";
@@ -52,7 +58,34 @@ churchBell.createDSP(audioContext, 1024)
 //==========================================================================================
 
 function accelerationChange(accx, accy, accz) {
-    // playAudio()
+    if (!Number.isFinite(accz)) {
+        return;
+    }
+
+    if (accelerationBaselineZ === null) {
+        accelerationBaselineZ = accz;
+        return;
+    }
+
+    const movement = accz - accelerationBaselineZ;
+    const movementMagnitude = Math.abs(movement);
+    const now = performance.now();
+
+    if (movementArmed && movementMagnitude >= movementThreshold) {
+        playAudio();
+        movementArmed = false;
+        quietSince = null;
+    } else if (movementMagnitude < movementReleaseThreshold) {
+        if (quietSince === null) {
+            quietSince = now;
+        } else if (now - quietSince >= quietRearmTime) {
+            movementArmed = true;
+        }
+
+        accelerationBaselineZ += (accz - accelerationBaselineZ) * 0.02;
+    } else {
+        quietSince = null;
+    }
 }
 
 function rotationChange(rotx, roty, rotz) {
@@ -74,7 +107,6 @@ function deviceTurned() {
 function deviceShaken() {
     shaketimer = millis();
     statusLabels[0].style("color", "pink");
-    playAudio();
 }
 
 function getMinMaxParam(address) {
