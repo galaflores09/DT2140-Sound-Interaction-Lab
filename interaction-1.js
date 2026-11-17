@@ -59,15 +59,19 @@ function accelerationChange(accx, accy, accz) {
 
 function rotationChange(rotx, roty, rotz) {
     const tilt = rotz;
-    const side = tilt > tiltThreshold ? 1
-        : tilt < -tiltThreshold ? -1
-            : 0;
+    const side = tilt > tiltThreshold ? 1 : tilt < -tiltThreshold ? -1 : 0;
 
-    if (side !== 0 && side !== lastTiltSide) {
+    if (side !== 0 && (lastTiltSide === 0 || side !== lastTiltSide)) {
         playAudio();
     }
 
-    lastTiltSide = side;
+    if (side === 0) {
+        if (Math.abs(tilt) < tiltThreshold - 4) {
+            lastTiltSide = 0;
+        }
+    } else {
+        lastTiltSide = side;
+    }
 }
 
 function mousePressed() {

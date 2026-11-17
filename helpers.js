@@ -27,21 +27,16 @@ function getParamMinMax(param) {
 //==========================================================================================
 
 function setMotionListeners() {
-  if (typeof DeviceMotionEvent.requestPermission === 'function') {
-    // alert('Motion sensors permission denied. Please enable in Settings > Safari > Motion & Orientation Access');
-
-    // iOS 13+ requires permission request from user gesture
-    DeviceMotionEvent.requestPermission()
-      .then(permissionState => {
-        if (permissionState === 'granted') {
-          console.log("Permission granted to sensors");
-        }
-      })
-      .catch((error) => {
-        console.log("Error getting sensor permission: %O", error);
-        alert('Motion sensors permission denied.');
-      });
+  const orientationEvent = window.DeviceOrientationEvent;
+  if (typeof orientationEvent?.requestPermission === 'function') {
+    return orientationEvent.requestPermission().then(permissionState => {
+      if (permissionState !== 'granted') {
+        throw new Error('Motion sensor permission was not granted.');
+      }
+    });
   }
+
+  return Promise.resolve();
 }
 
 //==========================================================================================

@@ -31,19 +31,30 @@ let turntimer = 0;
 // AUDIO
 //==========================================================================================
 
-function contextAudioStart() {
-  if (!dspNode) {
-    return;
-  }
-  if (audioContext.state === 'suspended') {
-    audioContext.resume();
-    // startDsp();
-    buttons[0].html('Turn Off DSP');
-    setMotionListeners()
-  } else {
+async function contextAudioStart() {
+  if (audioContext.state === 'running') {
     audioContext.suspend();
     buttons[0].html('Turn On DSP');
+    return;
   }
+
+  const motionPermission = setMotionListeners();
+  try {
+    await audioContext.resume();
+  } catch (error) {
+    console.error('Could not start audio:', error);
+    alert('Could not start audio. Check that your browser allows audio playback.');
+    return;
+  }
+
+  try {
+    await motionPermission;
+  } catch (error) {
+    console.error('Could not enable motion sensors:', error);
+    alert('Motion permission was denied. Allow motion access in your browser settings and try again.');
+  }
+
+  buttons[0].html('Turn Off DSP');
 }
 
 //==========================================================================================
@@ -54,8 +65,6 @@ function contextAudioStart() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  setMotionListeners();
 
   let valBox = createDiv();
   valBox.id("valuelabels");
